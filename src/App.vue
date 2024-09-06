@@ -1,19 +1,20 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import KamalaCube from "./components/KamalaCube.vue";
+</script>
 
 <template>
-  <div class="mx-auto w-full h-screen bg-black">
-    <div
-      class="mx-auto w-1/2 h-screen my-10 flex flex-col items-center justify-center text-center space-y-12"
-    >
-      <h1 class="text-white text-5xl sm:text-7xl font-neue-metana-bold">
-        Kamala Harris for President.
-      </h1>
-      <div class="flex flex-col space-y-2">
-        <p class="text-white font-neue-metana-normal">
-          Big things coming here soon. Watch this space...
-        </p>
-        <p class="text-white font-neue-metana-normal"></p>
-      </div>
-    </div>
-  </div>
+  <KamalaCube />
 </template>
+
+<style scoped>
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  color: blue; /* Adjust text color for visibility */
+  padding: 20px;
+}
+</style>
