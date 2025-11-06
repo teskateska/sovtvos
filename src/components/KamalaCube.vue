@@ -18,6 +18,10 @@ let velocityX = 0.02;
 let velocityY = 0.015;
 let cubeSize = 1; // Size of the cube for collision detection
 
+// Cached boundary values (recalculated on resize)
+let maxX = 0;
+let maxY = 0;
+
 function initThree() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(
@@ -41,6 +45,19 @@ function initThree() {
   scene.add(cube);
 
   camera.position.z = 1;
+  
+  // Calculate initial boundaries
+  updateBoundaries();
+}
+
+function updateBoundaries() {
+  const aspect = window.innerWidth / window.innerHeight;
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const height = 2 * Math.tan(vFOV / 2) * Math.abs(camera.position.z - cube.position.z);
+  const width = height * aspect;
+  
+  maxX = width / 2 - cubeSize / 2;
+  maxY = height / 2 - cubeSize / 2;
 }
 
 function animate() {
@@ -54,26 +71,21 @@ function animate() {
   cube.position.x += velocityX;
   cube.position.y += velocityY;
   
-  // Calculate visible boundaries based on camera frustum
-  const aspect = window.innerWidth / window.innerHeight;
-  const vFOV = THREE.MathUtils.degToRad(camera.fov);
-  const height = 2 * Math.tan(vFOV / 2) * Math.abs(camera.position.z - cube.position.z);
-  const width = height * aspect;
-  
-  const maxX = width / 2 - cubeSize / 2;
-  const maxY = height / 2 - cubeSize / 2;
-  
   // Check boundaries and reverse direction if needed
-  if (cube.position.x >= maxX || cube.position.x <= -maxX) {
-    velocityX = -velocityX;
-    // Clamp position to prevent cube from going out of bounds
-    cube.position.x = Math.max(-maxX, Math.min(maxX, cube.position.x));
+  if (cube.position.x >= maxX) {
+    velocityX = -Math.abs(velocityX); // Ensure negative velocity
+    cube.position.x = maxX - 0.001; // Position just inside boundary
+  } else if (cube.position.x <= -maxX) {
+    velocityX = Math.abs(velocityX); // Ensure positive velocity
+    cube.position.x = -maxX + 0.001; // Position just inside boundary
   }
   
-  if (cube.position.y >= maxY || cube.position.y <= -maxY) {
-    velocityY = -velocityY;
-    // Clamp position to prevent cube from going out of bounds
-    cube.position.y = Math.max(-maxY, Math.min(maxY, cube.position.y));
+  if (cube.position.y >= maxY) {
+    velocityY = -Math.abs(velocityY); // Ensure negative velocity
+    cube.position.y = maxY - 0.001; // Position just inside boundary
+  } else if (cube.position.y <= -maxY) {
+    velocityY = Math.abs(velocityY); // Ensure positive velocity
+    cube.position.y = -maxY + 0.001; // Position just inside boundary
   }
   
   renderer.render(scene, camera);
@@ -91,6 +103,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updateBoundaries(); // Recalculate boundaries on resize
 }
 
 onUnmounted(() => {
