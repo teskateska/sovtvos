@@ -17,6 +17,7 @@ let texture: THREE.Texture;
 let velocityX = 0.02;
 let velocityY = 0.015;
 let cubeSize = 1; // Size of the cube for collision detection
+const BOUNDARY_OFFSET = 0.001; // Small offset to prevent cube from sticking at boundaries
 
 // Cached boundary values (recalculated on resize)
 let maxX = 0;
@@ -53,7 +54,9 @@ function initThree() {
 function updateBoundaries() {
   const aspect = window.innerWidth / window.innerHeight;
   const vFOV = THREE.MathUtils.degToRad(camera.fov);
-  const height = 2 * Math.tan(vFOV / 2) * Math.abs(camera.position.z - cube.position.z);
+  // Use cube's actual z-position for accurate boundary calculation
+  const distance = Math.abs(camera.position.z - cube.position.z);
+  const height = 2 * Math.tan(vFOV / 2) * distance;
   const width = height * aspect;
   
   maxX = width / 2 - cubeSize / 2;
@@ -74,18 +77,18 @@ function animate() {
   // Check boundaries and reverse direction if needed
   if (cube.position.x >= maxX) {
     velocityX = -Math.abs(velocityX); // Ensure negative velocity
-    cube.position.x = maxX - 0.001; // Position just inside boundary
+    cube.position.x = maxX - BOUNDARY_OFFSET; // Position just inside boundary
   } else if (cube.position.x <= -maxX) {
     velocityX = Math.abs(velocityX); // Ensure positive velocity
-    cube.position.x = -maxX + 0.001; // Position just inside boundary
+    cube.position.x = -maxX + BOUNDARY_OFFSET; // Position just inside boundary
   }
   
   if (cube.position.y >= maxY) {
     velocityY = -Math.abs(velocityY); // Ensure negative velocity
-    cube.position.y = maxY - 0.001; // Position just inside boundary
+    cube.position.y = maxY - BOUNDARY_OFFSET; // Position just inside boundary
   } else if (cube.position.y <= -maxY) {
     velocityY = Math.abs(velocityY); // Ensure positive velocity
-    cube.position.y = -maxY + 0.001; // Position just inside boundary
+    cube.position.y = -maxY + BOUNDARY_OFFSET; // Position just inside boundary
   }
   
   renderer.render(scene, camera);
