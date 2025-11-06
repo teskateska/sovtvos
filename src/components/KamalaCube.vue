@@ -24,6 +24,16 @@ let maxX = 0;
 let maxY = 0;
 let time = 0;
 
+// DVD bouncing variables
+let velocityX = 0.02;
+let velocityY = 0.015;
+let cubeSize = 1; // Size of the cube for collision detection
+const BOUNDARY_OFFSET = 0.001; // Small offset to prevent cube from sticking at boundaries
+
+// Cached boundary values (recalculated on resize)
+let maxX = 0;
+let maxY = 0;
+
 function initThree() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x800080); // Set background color (dark gray)
@@ -70,6 +80,21 @@ function updateBoundaries() {
 
   maxX = width / 2 - cubeSize / 2;
   maxY = height / 2 - cubeSize / 2;
+
+  // Calculate initial boundaries
+  updateBoundaries();
+}
+
+function updateBoundaries() {
+  const aspect = window.innerWidth / window.innerHeight;
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  // Use cube's actual z-position for accurate boundary calculation
+  const distance = Math.abs(camera.position.z - cube.position.z);
+  const height = 2 * Math.tan(vFOV / 2) * distance;
+  const width = height * aspect;
+
+  maxX = width / 2 - cubeSize / 2;
+  maxY = height / 2 - cubeSize / 2;
 }
 
 function animate() {
@@ -87,6 +112,7 @@ function animate() {
 
   scene.background = new THREE.Color(r, g, b);
 
+  // Keep rotation for visual effect
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
 
@@ -119,6 +145,27 @@ function animate() {
   } else if (cube.position.y <= -maxY) {
     velocityY = Math.abs(velocityY); // Ensure positive velocity
     cube.position.y = -maxY + 0.001; // Position just inside boundary
+  }
+
+  // Update position for DVD bouncing effect
+  cube.position.x += velocityX;
+  cube.position.y += velocityY;
+
+  // Check boundaries and reverse direction if needed
+  if (cube.position.x >= maxX) {
+    velocityX = -Math.abs(velocityX); // Ensure negative velocity
+    cube.position.x = maxX - BOUNDARY_OFFSET; // Position just inside boundary
+  } else if (cube.position.x <= -maxX) {
+    velocityX = Math.abs(velocityX); // Ensure positive velocity
+    cube.position.x = -maxX + BOUNDARY_OFFSET; // Position just inside boundary
+  }
+
+  if (cube.position.y >= maxY) {
+    velocityY = -Math.abs(velocityY); // Ensure negative velocity
+    cube.position.y = maxY - BOUNDARY_OFFSET; // Position just inside boundary
+  } else if (cube.position.y <= -maxY) {
+    velocityY = Math.abs(velocityY); // Ensure positive velocity
+    cube.position.y = -maxY + BOUNDARY_OFFSET; // Position just inside boundary
   }
 
   renderer.render(scene, camera);
