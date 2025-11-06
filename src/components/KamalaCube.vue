@@ -17,6 +17,10 @@ let texture: THREE.Texture;
 let velocityX = 0.02;
 let velocityY = 0.015;
 let cubeSize = 1; // Size of the cube for collision detection
+
+// Cached boundary values (recalculated on resize)
+let maxX = 0;
+let maxY = 0;
 let time = 0;
 
 function initThree() {
@@ -50,6 +54,20 @@ function initThree() {
   scene.add(cube);
 
   camera.position.z = 1;
+
+  // Calculate initial boundaries
+  updateBoundaries();
+}
+
+function updateBoundaries() {
+  const aspect = window.innerWidth / window.innerHeight;
+  const vFOV = THREE.MathUtils.degToRad(camera.fov);
+  const height =
+    2 * Math.tan(vFOV / 2) * Math.abs(camera.position.z - cube.position.z);
+  const width = height * aspect;
+
+  maxX = width / 2 - cubeSize / 2;
+  maxY = height / 2 - cubeSize / 2;
 }
 
 function animate() {
@@ -112,6 +130,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updateBoundaries(); // Recalculate boundaries on resize
 }
 
 onUnmounted(() => {
