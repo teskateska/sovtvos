@@ -44,9 +44,12 @@ function initThree() {
   const textureLoader = new THREE.TextureLoader();
   texture = textureLoader.load(kamalaImage);
 
-  // Make texture sharper
-  texture.minFilter = THREE.NearestFilter;
-  texture.magFilter = THREE.NearestFilter;
+  // Configure texture for non-power-of-two (NPOT) dimensions
+  // Required for mobile devices (especially iOS) to display textures correctly
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
   geometry = new THREE.BoxGeometry();
